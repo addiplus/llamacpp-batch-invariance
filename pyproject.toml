@@ -1,0 +1,87 @@
+[build-system]
+requires = ["hatchling>=1.21"]
+build-backend = "hatchling.build"
+
+[project]
+name = "llamacpp-batch-invariance"
+version = "0.1.0"
+description = "Per-cell batch-invariance verifier for OpenAI-compatible local LLM servers (llama.cpp continuous batching). Detects when concurrent/batched dispatch changes scored outputs vs serial."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+authors = [{ name = "addiplus" }]
+keywords = [
+    "llama.cpp",
+    "batch-invariance",
+    "continuous-batching",
+    "determinism",
+    "llm",
+    "inference",
+    "verification",
+    "openai-compatible",
+    "evaluation",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Testing",
+    "Typing :: Typed",
+]
+
+# ZERO runtime dependencies -- the verifier core is pure Python standard library by
+# design (auditable, airgap-friendly). Verified: the package imports only __future__,
+# the stdlib, and local siblings at runtime.
+dependencies = []
+
+[project.optional-dependencies]
+# Contributor tooling only; the runtime install stays stdlib-only.
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.6",
+]
+
+[project.urls]
+Homepage = "https://github.com/addiplus/llamacpp-batch-invariance"
+Issues = "https://github.com/addiplus/llamacpp-batch-invariance/issues"
+
+# Console entry point: `batch-invariance <subcommand>` -> batch_invariance/cli.py:main
+# (subcommands: run-live / run-mock / verify-cert / plan-n).
+[project.scripts]
+batch-invariance = "batch_invariance.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/batch_invariance"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "src/",
+    "tests/",
+    "examples/",
+    "docs/",
+    "README.md",
+    "LICENSE",
+    "NOTICE",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra -q"
+# Import batch_invariance.* in tests against the src tree without an editable install.
+pythonpath = ["src"]
+
+[tool.ruff]
+src = ["src", "tests"]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+# pycodestyle (E), pyflakes (F), isort (I), pyupgrade (UP), flake8-bugbear (B)
+select = ["E", "F", "I", "UP", "B"]

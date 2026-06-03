@@ -1,0 +1,71 @@
+# models.example.toml -- EXAMPLE model registry for this profile.
+#
+# Copy this file to ``models.toml`` and edit it for YOUR models. It maps a short
+# ``alias`` (what you pass to ``--model-alias``) to the on-disk GGUF path and the
+# llama-server launch flags for that model. NOTHING here is required by the engine --
+# the gate also accepts ``--model <path>`` + ``--server-flag`` directly; this file is
+# just a convenience so an operator can name their models once.
+#
+# TEMPLATING: paths use the ``{MODELS_DIR}`` placeholder so the file is portable. A
+# loader substitutes it with your model directory (e.g. from a ``MODELS_DIR`` env var
+# or a ``--models-dir`` flag). The aliases and filenames below are GENERIC PLACEHOLDERS
+# -- replace ``demo-model-*.gguf`` with your real GGUF basenames.
+#
+# This is DATA: no real model names, no hostnames, no absolute machine paths.
+
+[defaults]
+# Path to the server binary (e.g. your llama-server). OPTIONAL: when set here, the
+# `run-live --profile <name> --model-alias <alias>` command needs no --server-bin flag
+# (it is host-specific, so it is left UNSET in this example -- uncomment + edit it, or
+# pass --server-bin on the command line). A per-[[models]] entry may override it. The
+# {MODELS_DIR} placeholder is substituted here too if you co-locate the binary.
+# server_bin = "/path/to/llama-server"
+
+# Standard llama-server flags applied to every model unless an entry overrides them.
+# These are the generic high-throughput-batching flags (full GPU offload, flash
+# attention, q8_0 KV cache); tune per your hardware. ``--host 127.0.0.1`` is always
+# enforced by the driver (local-only experiment server); do not add a bind address here.
+server_flags = [
+    "-ngl", "999",            # offload all layers to GPU (999 = "all")
+    "--flash-attn", "on",
+    "--no-mmap",
+    "-b", "2048",             # logical batch size
+    "-ub", "2048",            # physical (micro) batch size
+    "--cache-type-k", "q8_0",
+    "--cache-type-v", "q8_0",
+    "--threads", "10",
+    "--threads-batch", "10",
+    "--jinja",                # apply the model's chat template
+]
+
+# ---------------------------------------------------------------------------
+# One [[models]] table per model. ``alias`` is what you pass to --model-alias.
+# ``gguf`` is the model file (use the {MODELS_DIR} placeholder). ``kv`` names the KV
+# quant (must match a key in kv_profiles.toml's [kv_factor]); the engine uses it for
+# the footprint projection. ``server_flags`` (optional) ADD TO / OVERRIDE [defaults].
+# ---------------------------------------------------------------------------
+
+[[models]]
+alias = "demo-coder"
+gguf = "{MODELS_DIR}/demo-model-a.gguf"
+kv = "q8_0"
+# A code-oriented model. Inherits [defaults].server_flags as-is.
+
+[[models]]
+alias = "demo-reasoner"
+gguf = "{MODELS_DIR}/demo-model-b.gguf"
+kv = "q8_0"
+# A reasoning model that may emit <think> blocks; the scorer flags reasoning that
+# leaks into the answer (see quality_scorer reasoning-leak detection). No extra flags
+# required here -- add model-specific flags via server_flags if your build needs them.
+
+[[models]]
+alias = "demo-dense"
+gguf = "{MODELS_DIR}/demo-model-c.gguf"
+kv = "q4_0"               # a 4-bit KV example -> ~half the KV footprint of q8_0
+server_flags = [          # this entry overrides the KV cache flags to match kv = q4_0
+    "--cache-type-k", "q4_0",
+    "--cache-type-v", "q4_0",
+]
+# A small dense model is a good first cell to run the live gate against (a dense-model
+# GREEN says nothing about MoE expert-routing divergence -- see the README caveats).

@@ -1,0 +1,20 @@
+[
+  {
+    "item": "Recall the hidden token: the secret is alpha-bravo-7. What is the secret?",
+    "expected_answer": "Recall the hidden token: the secret is alpha-bravo-7. What is the secret?",
+    "family": "retrieval",
+    "fill": 0.10
+  },
+  {
+    "item": "Memorize this marker: charlie-delta-9. Repeat the marker.",
+    "expected_answer": "Memorize this marker: charlie-delta-9. Repeat the marker.",
+    "family": "retrieval",
+    "fill": 0.20
+  },
+  {
+    "item": "The needle phrase is echo-foxtrot-3. State the needle phrase.",
+    "expected_answer": "The needle phrase is echo-foxtrot-3. State the needle phrase.",
+    "family": "retrieval",
+    "fill": 0.30
+  }
+]

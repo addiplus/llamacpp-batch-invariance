@@ -1,0 +1,50 @@
+# kv_profiles.toml -- KV-cache byte/footprint reference data for this profile.
+#
+# DATA ONLY. This file holds the KV-quant scaling factors and the footprint anchors
+# that batch_invariance.kv_budget uses to project "how much memory does an N-slot
+# llama.cpp server at context C need?". The values are generic llama.cpp facts (KV
+# scales linearly with total KV tokens = ctx * parallel and with the quant's
+# bytes-per-element); they are NOT host policy. Every per-machine knob (total pool,
+# reservation, safety margin) is a runtime argument of kv_budget.get_kv_budget_gb(),
+# never baked here. No paths, no hostnames, no model filenames -- just numbers.
+#
+# These mirror the constants compiled into kv_budget.py so the profile is
+# self-describing; a tool may load this table to render/override the KV math without
+# importing the module.
+
+[meta]
+# What the anchor figure below was measured against. Kept deliberately generic: a
+# ~30B-parameter model on a unified-memory GPU host. The KV footprint is dominated by
+# context length (ctx * parallel), not by the weights, so the per-token figure is a
+# reasonable reference across similar-class models.
+reference_model_class = "30B-parameter, dense or A3B-MoE"
+reference_host_class = "unified-memory GPU host"
+notes = "KV is linear in ctx*parallel; weights are a separate (additive) term."
+
+[anchors]
+# KV-cache footprint of ONE server at the full reference context, single slot, q8_0
+# K+V. kv_budget scales this linearly: kv_gb = kv_gb_at_full_ctx * (ctx/kv_ref_ctx)
+# * parallel * kv_factor[quant].
+kv_gb_at_full_ctx = 13.0        # GB of KV at kv_ref_ctx, parallel=1, q8_0 K+V
+kv_ref_ctx = 131072             # the reference context length the anchor was taken at
+per_server_overhead_gb = 1.5    # compute buffers + framework context pad, per server
+hard_floor_gb = 8.0             # keep this much host memory free (defense-in-depth)
+hard_ctx_cap = 131072           # a sane global ceiling on a single server's ctx
+
+# Bytes-per-element of each KV quant RELATIVE to q8_0 (= 1.0). Multiply the q8_0
+# anchor by the factor to get that quant's KV footprint. An unrecognised quant should
+# fall back to 1.0 (q8_0-equivalent) so a typo over- (never under-) estimates memory.
+[kv_factor]
+q8_0 = 1.0      # reference
+f16 = 2.0       # full half-precision K+V: twice q8_0
+q4_0 = 0.5      # 4-bit
+q4_1 = 0.5      # 4-bit (variant)
+q5_0 = 0.625    # 5-bit
+q5_1 = 0.625    # 5-bit (variant)
+
+# Worked examples (parallel=1, q8_0), for sanity-checking a loader against kv_budget:
+#   ctx =   8192 -> ~0.81 GB KV      (13.0 * 8192/131072)
+#   ctx =  32768 -> ~3.25 GB KV
+#   ctx = 131072 -> ~13.0 GB KV      (the anchor)
+# Halve those for q4_0 (factor 0.5); double for f16 (factor 2.0). A 4-slot server at
+# ctx=8192 q8_0 -> ~3.25 GB KV (= kv_gb(8192, 4, "q8_0")), plus weights + overhead.

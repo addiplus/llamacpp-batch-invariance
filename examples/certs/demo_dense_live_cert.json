@@ -1,0 +1,343 @@
+{
+  "anomaly": null,
+  "arm_b": {
+    "ab_passed": true,
+    "bc_passed": false
+  },
+  "cobatch_coverage": {
+    "attribution_certain": true,
+    "cobatch_coverage_ok": true,
+    "coverage_checked": true,
+    "coverage_fraction": 0.9583333333333334,
+    "min_coverage_fraction": 0.8,
+    "n_co_batched": 46,
+    "n_ids": 48,
+    "n_missing_interval": 0,
+    "required_co_batched": 39,
+    "server_peak_busy_slots_floor": 4
+  },
+  "completion_floor": {
+    "completion_floor_ok": true,
+    "min_ok_fraction": 0.8,
+    "n_failure_a": 0,
+    "n_failure_b": 0,
+    "n_failure_c": 0,
+    "n_ok_a": 48,
+    "n_ok_b": 48,
+    "n_ok_c": 48
+  },
+  "ctx": 8192,
+  "ctx_sweep": null,
+  "decision_reasons": [
+    "AC.n_divergent=1; AB.n_divergent=0; BC.n_divergent=1",
+    "client_overlap_depth=4(>= 2?True); server_busy_slots=4(>= 2?True); overlap_ok=True",
+    "completion_floor: n_ok_A=48, n_ok_C=48, required>=39 (>= 0.80 of n_compared=48); completion_floor_ok=True",
+    "cobatch_coverage: n_co_batched=46/48 (fraction=0.958, required>=39 @ >= 0.80); attribution_certain=True; missing_interval=0; server_peak_busy_slots=4 (corroborating floor only); cobatch_coverage_ok=True",
+    "AC diverges but AB is clean -> divergence is pure continuous-batching (co-batching), not slot allocation."
+  ],
+  "dispatch_n": 4,
+  "divergence_class": "co_batching",
+  "divergence_report": {
+    "AB": {
+      "by_family": {
+        "A2": {
+          "divergent": 0,
+          "n": 6
+        },
+        "A4": {
+          "divergent": 0,
+          "n": 3
+        },
+        "B1": {
+          "divergent": 0,
+          "n": 3
+        },
+        "C1": {
+          "divergent": 0,
+          "n": 6
+        },
+        "D1": {
+          "divergent": 0,
+          "n": 6
+        },
+        "E1": {
+          "divergent": 0,
+          "n": 6
+        },
+        "E2": {
+          "divergent": 0,
+          "n": 3
+        },
+        "E3": {
+          "divergent": 0,
+          "n": 3
+        },
+        "E4": {
+          "divergent": 0,
+          "n": 6
+        },
+        "E5": {
+          "divergent": 0,
+          "n": 6
+        }
+      },
+      "by_fill": {
+        "0.05": 0,
+        "0.30": 0,
+        "0.90": 0
+      },
+      "divergence_rate": 0.0,
+      "divergent_ids": [],
+      "logit_drift": {
+        "armed": false,
+        "eps": 0.0,
+        "logit_drift_ids": [],
+        "max_logit_delta": 0.0,
+        "per_id_delta": {}
+      },
+      "n_compared": 48,
+      "n_divergent": 0,
+      "n_token_only": 1,
+      "only_x": [],
+      "only_y": [],
+      "pair": "AB",
+      "per_id": [],
+      "token_divergence_ids": [
+        "phi-4|8192|C1|0.352941|1|fill0.30"
+      ]
+    },
+    "AC": {
+      "by_family": {
+        "A2": {
+          "divergent": 0,
+          "n": 6
+        },
+        "A4": {
+          "divergent": 0,
+          "n": 3
+        },
+        "B1": {
+          "divergent": 0,
+          "n": 3
+        },
+        "C1": {
+          "divergent": 0,
+          "n": 6
+        },
+        "D1": {
+          "divergent": 0,
+          "n": 6
+        },
+        "E1": {
+          "divergent": 0,
+          "n": 6
+        },
+        "E2": {
+          "divergent": 0,
+          "n": 3
+        },
+        "E3": {
+          "divergent": 0,
+          "n": 3
+        },
+        "E4": {
+          "divergent": 1,
+          "n": 6
+        },
+        "E5": {
+          "divergent": 0,
+          "n": 6
+        }
+      },
+      "by_fill": {
+        "0.05": 0,
+        "0.30": 1,
+        "0.90": 0
+      },
+      "divergence_rate": 0.020833333333333332,
+      "divergent_ids": [
+        "phi-4|8192|E4|0.823529|2|fill0.30"
+      ],
+      "logit_drift": {
+        "armed": false,
+        "eps": 0.0,
+        "logit_drift_ids": [],
+        "max_logit_delta": 0.0,
+        "per_id_delta": {}
+      },
+      "n_compared": 48,
+      "n_divergent": 1,
+      "n_token_only": 4,
+      "only_x": [],
+      "only_y": [],
+      "pair": "AC",
+      "per_id": [
+        {
+          "field": "extracted_answer",
+          "test_id": "phi-4|8192|E4|0.823529|2|fill0.30",
+          "token_identical": false,
+          "x": "def total(items):\n    s = 0\n    for i in range(0, len(items)):  # Start at 0 instead of 1\n        s = s + items[i]\n    return s",
+          "x_content_sha": "29eba8058f3a",
+          "y": "def total(items):\n    s = 0\n    for i in range(0, len(items)):\n        s = s + items[i]\n    return s",
+          "y_content_sha": "613688b92329"
+        }
+      ],
+      "token_divergence_ids": [
+        "phi-4|8192|B1|0.235294|2|fill0.30",
+        "phi-4|8192|C1|0.294118|0|fill0.30",
+        "phi-4|8192|C1|0.294118|2|fill0.30",
+        "phi-4|8192|C1|0.352941|0|fill0.30"
+      ]
+    },
+    "BC": {
+      "by_family": {
+        "A2": {
+          "divergent": 0,
+          "n": 6
+        },
+        "A4": {
+          "divergent": 0,
+          "n": 3
+        },
+        "B1": {
+          "divergent": 0,
+          "n": 3
+        },
+        "C1": {
+          "divergent": 0,
+          "n": 6
+        },
+        "D1": {
+          "divergent": 0,
+          "n": 6
+        },
+        "E1": {
+          "divergent": 0,
+          "n": 6
+        },
+        "E2": {
+          "divergent": 0,
+          "n": 3
+        },
+        "E3": {
+          "divergent": 0,
+          "n": 3
+        },
+        "E4": {
+          "divergent": 1,
+          "n": 6
+        },
+        "E5": {
+          "divergent": 0,
+          "n": 6
+        }
+      },
+      "by_fill": {
+        "0.05": 0,
+        "0.30": 1,
+        "0.90": 0
+      },
+      "divergence_rate": 0.020833333333333332,
+      "divergent_ids": [
+        "phi-4|8192|E4|0.823529|2|fill0.30"
+      ],
+      "logit_drift": {
+        "armed": false,
+        "eps": 0.0,
+        "logit_drift_ids": [],
+        "max_logit_delta": 0.0,
+        "per_id_delta": {}
+      },
+      "n_compared": 48,
+      "n_divergent": 1,
+      "n_token_only": 5,
+      "only_x": [],
+      "only_y": [],
+      "pair": "BC",
+      "per_id": [
+        {
+          "field": "extracted_answer",
+          "test_id": "phi-4|8192|E4|0.823529|2|fill0.30",
+          "token_identical": false,
+          "x": "def total(items):\n    s = 0\n    for i in range(0, len(items)):  # Start at 0 instead of 1\n        s = s + items[i]\n    return s",
+          "x_content_sha": "29eba8058f3a",
+          "y": "def total(items):\n    s = 0\n    for i in range(0, len(items)):\n        s = s + items[i]\n    return s",
+          "y_content_sha": "613688b92329"
+        }
+      ],
+      "token_divergence_ids": [
+        "phi-4|8192|B1|0.235294|2|fill0.30",
+        "phi-4|8192|C1|0.294118|0|fill0.30",
+        "phi-4|8192|C1|0.294118|2|fill0.30",
+        "phi-4|8192|C1|0.352941|0|fill0.30",
+        "phi-4|8192|C1|0.352941|1|fill0.30"
+      ]
+    }
+  },
+  "gate": "abc_union",
+  "invariant_fields": [
+    "score",
+    "passed",
+    "extracted_answer",
+    "expected_answer",
+    "prompt_tokens_measured",
+    "failure_mode"
+  ],
+  "kv_label": "q8_0",
+  "mismatch": "AC divergent on 1 id(s); e.g. test_id='phi-4|8192|E4|0.823529|2|fill0.30' field='extracted_answer' A='def total(items):\\n    s = 0\\n    for i in range(0, len(items)):  # Start at 0 instead of 1\\n        s = s + items[i]\\n    return s' C='def total(items):\\n    s = 0\\n    for i in range(0, len(items)):\\n        s = s + items[i]\\n    return s'",
+  "model": "phi-4",
+  "n_passes": 8,
+  "overlap": {
+    "client_max_overlap_depth": 4,
+    "overlap_ok": true,
+    "server_peak_busy_slots": 4
+  },
+  "overlap_ok": true,
+  "per_pass_ac_divergent": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "per_pass_ac_token_only": [
+    3,
+    2,
+    2,
+    3,
+    2,
+    1,
+    2,
+    2
+  ],
+  "promotion_scope": {
+    "generalizes": false,
+    "is_dense_smoke_model": false,
+    "note": "This cert licenses ONLY the exact (model, ctx, N) above. It does NOT generalize across ctx, N, or model. A dense model is the least divergence-prone case; a GREEN on one says NOTHING about MoE expert-routing divergence or about higher-ctx / higher-N cells, where #7052 divergence is most likely. Re-run the live gate per (model, ctx, N) before promoting any batched cell; on ANY non-green keep that cell --parallel 1.",
+    "tested_model_looks_moe": false,
+    "valid_for": {
+      "ctx": 8192,
+      "dispatch_n": 4,
+      "model": "phi-4"
+    }
+  },
+  "reps": 3,
+  "sensitivity": {
+    "interpretation": "GREEN means 'no divergence DETECTED at this (model,ctx,N,T,K)', per-cell; it does NOT generalize and is only as strong as n_hot_trials (rule-of-three 95% upper bound 3/n_hot_trials).",
+    "n_ac_divergent": 1,
+    "n_hot_trials": 48,
+    "rate_upper_bound_95": null
+  },
+  "source": "live",
+  "status": "failed",
+  "token_divergence_ids": [
+    "phi-4|8192|B1|0.235294|2|fill0.30",
+    "phi-4|8192|C1|0.294118|0|fill0.30",
+    "phi-4|8192|C1|0.294118|2|fill0.30",
+    "phi-4|8192|C1|0.352941|0|fill0.30"
+  ],
+  "ts_utc": "2026-06-03T01:49:52Z"
+}
