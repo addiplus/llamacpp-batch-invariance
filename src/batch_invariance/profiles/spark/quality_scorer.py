@@ -242,7 +242,7 @@ def _extract_code_block(text: str) -> str:
       2. If no balanced fence matched, the text may carry an UNbalanced fence:
          a dropped opening (correct code with a dangling trailing ```), or an
          UNTERMINATED block (model hit the token cap mid-emit). In that case
-         locate the whole-line fence markers (^```[lang]?$ only — never a
+         locate the whole-line fence markers (^```[lang]?$ only, never a
          backtick embedded in a string literal) and:
            - if there is exactly one fence line, treat it as an opening and
              return everything AFTER it (unterminated block);
@@ -471,7 +471,7 @@ def _ast_semantic_signature(source: str):
     operators, and literal constants. Returns a sorted tuple, or None on parse fail.
 
     Deliberately EXCLUDES Name ids and arg names so a cosmetic rename (a/b -> x/y)
-    is NOT counted as a semantic flip — those are caught only by the token ratio and
+    is NOT counted as a semantic flip; those are caught only by the token ratio and
     stay sub-pass anyway. The operator/comparator/constant multiset is what makes
     `>` vs `>=` (Gt != GtE) and `x - 7` vs `x + 7` (Sub != Add) detectably different.
 
@@ -606,7 +606,7 @@ def _max_ngram_repeat_ratio(text: str, n: int = 3) -> float:
 
 
 # Canonical failure-mode labels for the quality-collapse classifier.
-# Pure-function, no LLM-judge — mirrors the reasoning_leak detector's discipline.
+# Pure-function, no LLM-judge. Mirrors the reasoning_leak detector's discipline.
 FAILURE_MODES = (
     "ok", "empty", "reasoning_leak", "runaway_repetition", "no_valid_json",
     "parse_fail", "http_timeout", "oom", "loop", "premature_eos",
@@ -677,13 +677,13 @@ def classify_failure_mode(
 # distinguishable from a genuine scored 'ok' so the driver can RETRY-on-empty with
 # a DIFFERENT seeded position. The two canonical empty-class labels are 'empty'
 # (blank content) and 'premature_eos' (blank content with completion_tokens == 0).
-# An empty must NEVER silently look like a pass — classify_failure_mode already
+# An empty must NEVER silently look like a pass, and classify_failure_mode already
 # routes blank content to one of these (never to 'ok'); the helpers below expose
 # that signal as a structured, additive contract for the driver.
 # ---------------------------------------------------------------------------
 
 # The empty-class failure modes (subset of FAILURE_MODES). Both mean "200 OK but no
-# usable content" — the RETRY-on-empty trigger.
+# usable content", the RETRY-on-empty trigger.
 EMPTY_FAILURE_MODES: frozenset = frozenset({"empty", "premature_eos"})
 
 # The driver should RETRY (with a different seeded position) on exactly these modes.
@@ -721,15 +721,15 @@ def classify_failure_detail(
     Returns (keys are STABLE; only ever ADDED to):
       {
         "failure_mode":   <one canonical FAILURE_MODES label> (== classify_failure_mode),
-        "is_empty":       bool  — True iff failure_mode in EMPTY_FAILURE_MODES,
-        "retryable_empty": bool — True iff the driver SHOULD retry-on-empty
+        "is_empty":       bool, True iff failure_mode in EMPTY_FAILURE_MODES,
+        "retryable_empty": bool, True iff the driver SHOULD retry-on-empty
                                    (failure_mode in RETRYABLE_EMPTY_MODES). An empty
                                    completion is ALWAYS retryable_empty; a scored
                                    'ok'/'wrong-answer'/'oom'/'timeout' is NOT.
-        "is_ok":          bool  — True iff failure_mode == "ok" (passed cleanly). An
+        "is_ok":          bool, True iff failure_mode == "ok" (passed cleanly). An
                                    empty is NEVER is_ok (the never-silently-a-pass
                                    invariant, surfaced explicitly).
-        "completion_tokens": int|None — echoed (0 distinguishes premature_eos from a
+        "completion_tokens": int|None, echoed (0 distinguishes premature_eos from a
                                    non-zero-token blank 'empty'); None when unknown.
       }
 

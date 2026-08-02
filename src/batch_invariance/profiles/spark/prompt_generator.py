@@ -174,7 +174,7 @@ def _expand_to_target(rng: random.Random, source_text: str, target_tokens: int) 
     """Tile or trim source_text deterministically to approximately target_tokens.
 
     Bug fix 2026-05-28: original implementation returned source as-is when source
-    already exceeded target — producing 577K-token prompts from a 2.4MB corpus
+    already exceeded target, producing 577K-token prompts from a 2.4MB corpus
     against an 8K context server. Now samples a contiguous window when source
     is too big, snapped to sentence boundaries.
     """
@@ -262,7 +262,7 @@ def _resolve_position(
 ) -> float:
     """Map a requested (position, strategy) onto the EFFECTIVE position in [0,1].
 
-    Pure + fully seeded — same (position, strategy, seed, swa_window, target_tokens)
+    Pure + fully seeded: same (position, strategy, seed, swa_window, target_tokens)
     tuple always returns the same float. No system-clock reads; all randomness goes
     through random.Random(seed).
 
@@ -281,12 +281,12 @@ def _resolve_position(
                     play" only when swa_window is a positive int AND it is smaller
                     than target_tokens (the prompt is longer than the window, so the
                     tail would evict an early-but-not-start needle). When SWA is
-                    ABSENT (swa_window is None / non-positive / >= target_tokens —
+                    ABSENT (swa_window is None / non-positive / >= target_tokens,
                     e.g. a DENSE full-attention model), adaptive is a NO-OP and
                     returns the clamped requested position VERBATIM (byte-identical
                     to "fixed"), so a dense vehicle is unaffected.
 
-    An unknown strategy falls through to the fixed (verbatim) behaviour — never
+    An unknown strategy falls through to the fixed (verbatim) behaviour, never
     raises (mirrors generate_prompt's unknown-filler_variant tolerance).
     """
     clamped = max(0.0, min(1.0, float(position)))
@@ -441,7 +441,7 @@ def _calibrate_filler(
     closest candidate seen (so a slightly-short reservoir still yields the best
     answer rather than raising). `capped` is True iff a ctx_cap was supplied AND
     the tolerance band around the aimed-at target crosses the ceiling
-    (eff_target + abs_tol > ctx_cap) — i.e. the uncapped optimum could itself
+    (eff_target + abs_tol > ctx_cap), i.e. the uncapped optimum could itself
     land above ctx_cap, so the ceiling is the binding constraint. (We do NOT key
     `capped` on "some probe exceeded the cap": the reservoir is deliberately
     oversized, so its full-length top probe exceeds ctx_cap on EVERY call and
@@ -456,7 +456,7 @@ def _calibrate_filler(
     can slip just OVER the server's hard `-c` cap and trip HTTP 400
     exceed_context. With ctx_cap given we (a) clamp the search target to
     min(target_tokens, ctx_cap) so we aim at-or-below the cap, and (b) NEVER
-    return a candidate whose measured tokens exceed ctx_cap — among capped probes
+    return a candidate whose measured tokens exceed ctx_cap; among capped probes
     we keep the LARGEST measured count <= ctx_cap (closest to full without
     overshoot), falling back to the smallest-overshoot candidate only if the
     reservoir's minimum already exceeds the cap (degenerate; cannot happen for a
@@ -466,7 +466,7 @@ def _calibrate_filler(
     reservoir = _build_reservoir(rng, base_text, target_tokens, filler_variant)
     lo, hi = 0, len(reservoir)
     # When a hard ctx ceiling is supplied, aim at-or-below it (a fill target that
-    # is itself above the cap is meaningless — we can never legally emit it).
+    # is itself above the cap is meaningless, since we can never legally emit it).
     eff_target = target_tokens if ctx_cap is None else min(target_tokens, ctx_cap)
     abs_tol = max(1, int(round(eff_target * tol)))
 
@@ -476,7 +476,7 @@ def _calibrate_filler(
     cap_filler: str | None = None
     cap_tok = -1
     # The ceiling is the BINDING constraint iff the tolerance band around the
-    # aimed-at target can reach above it — then the uncapped optimum could land
+    # aimed-at target can reach above it. Then the uncapped optimum could land
     # over ctx_cap and the clamp matters. Deterministic in (target, tol, cap);
     # independent of which probes the bisection happened to sample.
     ceiling_binds = bool(ctx_cap is not None and (eff_target + abs_tol) > ctx_cap)
@@ -507,8 +507,8 @@ def _calibrate_filler(
 
     best_filler, best_tok = measure(hi)
     best_diff = abs(best_tok - eff_target)
-    # If even the full reservoir is short of target, return it (best effort) —
-    # the downstream realized-vs-target assert will still flag any saturation.
+    # If even the full reservoir is short of target, return it (best effort).
+    # The downstream realized-vs-target assert will still flag any saturation.
     if best_tok < eff_target - abs_tol:
         # Try lo too in case empty is closer (it never is for positive target),
         # then return the full reservoir as the closest-achievable.
@@ -616,7 +616,7 @@ _E3_FUNCS = [
 # seed produces a distinct-but-canonical pair. The "bug" is described in prose.
 #
 # SCORER COUPLING (keep in sync): quality_scorer._ast_semantic_signature is tuned
-# to exactly the bug-vs-fix node classes these 3 templates exercise — a Constant
+# to exactly the bug-vs-fix node classes these 3 templates exercise: a Constant
 # flip (range(1)->range(0)), a BinOp flip (x-{n} -> x+{n}), and a Compare flip
 # (value>{n} -> value>={n}). If you ADD an E4 template whose bug-vs-fix difference
 # is a DIFFERENT node class (e.g. a swapped call, a renamed attribute, a string
@@ -945,11 +945,11 @@ def _build_family_e4(rng: random.Random) -> dict:
 # E5 semantic-hop code-symbol needle (perfect-retrieval control).
 #
 # The answer requires a TWO-PREDICATE HOP ("the function that calls parse_config
-# AND returns a dict"), and — critically — the answer is NOT a unique copyable
+# AND returns a dict"), and, critically, the answer is NOT a unique copyable
 # token:
 #   * the target name is drawn from the SAME generic pool as the decoys, and
 #   * the target name is ECHOED on a NON-answer line (a decoy CALLS it), and
-#   * a SECOND function ALSO calls parse_config but returns a LIST — so
+#   * a SECOND function ALSO calls parse_config but returns a LIST, so
 #     predicate-1 ("calls parse_config") is provably NON-unique and predicate-2
 #     ("returns a dict") is load-bearing; the answer can no longer be found by
 #     predicate-1 alone.
@@ -968,13 +968,13 @@ def _build_family_e5(rng: random.Random, seed: int) -> dict:
     returns a DICT. The answer is a GENERIC function name (also a decoy-pool
     member and echoed on a non-answer call line), so it cannot be won by copying
     the only special-looking identifier. Critically, a SECOND function ALSO calls
-    parse_config but returns a LIST — so predicate-1 ("calls parse_config") is
+    parse_config but returns a LIST, so predicate-1 ("calls parse_config") is
     provably non-unique and the model MUST use predicate-2 ("returns a dict") to
     disambiguate (the answer is NOT identifiable by predicate-1 alone). NoLiMa
     trap, arXiv 2502.05167. Deterministic per seed; exact-match scored on the
     function NAME."""
     names = rng.sample(_E5_HELPERS, 5)   # 5 generic names; none is "special"
-    target = names[0]                    # the answer — also echoed below
+    target = names[0]                    # the answer, also echoed below
     d1, d2, d3, dlist = names[1], names[2], names[3], names[4]
     needle = (
         # decoy 1: returns, but does NOT call parse_config
@@ -985,13 +985,13 @@ def _build_family_e5(rng: random.Random, seed: int) -> dict:
         f"    return dict(raw)\n\n"
         # DECOY: ALSO calls parse_config but returns a LIST, not a dict.
         # Now TWO functions call parse_config, so predicate-1 alone is NOT
-        # uniquely identifying — the model must use predicate-2 ("returns a
+        # uniquely identifying, so the model must use predicate-2 ("returns a
         # dict") to pick `target`.
         f"def {dlist}(p):\n"
         f"    cfg = parse_config(p)\n"
         f"    return list(cfg)\n\n"
         # decoy 2: structurally similar (also returns) and ECHOES the target name
-        # as a plain call (so `target` appears on a NON-answer line — copying the
+        # as a plain call (so `target` appears on a NON-answer line and copying the
         # token is now ambiguous), but this fn does NOT call parse_config.
         f"def {d2}(xs):\n    return {target}(xs[0]) if xs else {d3}(xs)\n\n"
         # decoy 3: returns, unrelated
@@ -1074,7 +1074,7 @@ def generate_prompt(
     model and is cheap insurance before a multi-model sweep.
 
     position_strategy (F0 PLACEMENT): selects HOW the requested `position` maps to
-    the EFFECTIVE needle position. DEFAULTS to "fixed" — byte-identical to the
+    the EFFECTIVE needle position. DEFAULTS to "fixed", byte-identical to the
     pre-strategy code path. See _resolve_position for the full contract:
       "fixed"    -> use `position` verbatim (TODAY's behaviour; the DEFAULT).
       "jitter"   -> seeded position jitter via random.Random(seed): perturb by a
@@ -1121,7 +1121,7 @@ def generate_prompt(
     # F0 PLACEMENT: resolve the EFFECTIVE position ONCE, up front, so the
     # calibration probes and the final emitted prompt all splice the needle at the
     # SAME offset (the measured prompt IS the returned prompt). _assemble then uses
-    # the resolved position with strategy="fixed" (verbatim) — never re-resolving.
+    # the resolved position with strategy="fixed" (verbatim), never re-resolving.
     # On the default "fixed"/dense-adaptive path effective_position == position, so
     # the assembled prompt is byte-identical to the pre-strategy code.
     effective_position = _resolve_position(
@@ -1132,7 +1132,7 @@ def generate_prompt(
     def _assemble(filler: str) -> str:
         """Assemble the full prompt_text from a filler string. Used identically
         by the legacy path, the measured-calibration binary search, and the
-        final returned prompt — so the measured prompt IS the returned prompt."""
+        final returned prompt, so the measured prompt IS the returned prompt."""
         haystack = _insert_at_position(filler, needle, effective_position)
         return (
             f"{haystack}\n\n"
@@ -1162,7 +1162,7 @@ def generate_prompt(
             calibration = "measured"
             # calibration_capped comes straight from the calibrator: True iff a
             # hard ctx ceiling was supplied, a probe actually exceeded it, and the
-            # emitted prompt was held at/under it — i.e. the would-be
+            # emitted prompt was held at/under it, i.e. the would-be
             # target*(1+tol) overshoot was clamped (the extreme-corner near-ctx
             # case). False on the measured path when no cap bound; None on legacy.
         except Exception:
@@ -1176,7 +1176,7 @@ def generate_prompt(
     if token_counter is None:
         # Legacy path (verbatim): size the filler budget with estimate_tokens.
         # Re-seed the RNG so the estimate path is byte-identical whether or not a
-        # (later-failing) counter was passed — calibration must not perturb the
+        # (later-failing) counter was passed, and calibration must not perturb the
         # determinism contract on the fallback.
         rng = random.Random(seed)
         _ = _BUILDERS[family](rng, seed)  # advance RNG exactly as the real build did
